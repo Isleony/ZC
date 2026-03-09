@@ -299,6 +299,24 @@ export default function App() {
             })}
 
             {incidents.map((x) => {
+              const color = COLORS[x.incident_type] || "#fff";
+              return (
+                <CircleMarker
+                  key={`ring-${x.id}`}
+                  center={[x.lat, x.lng]}
+                  radius={9}
+                  pathOptions={{
+                    color,
+                    fillColor: color,
+                    fillOpacity: 0,
+                    opacity: 0.9,
+                    weight: 2,
+                  }}
+                />
+              );
+            })}
+
+            {incidents.map((x) => {
               if (!isRecentShootout(x)) return null;
               return (
                 <CircleMarker
