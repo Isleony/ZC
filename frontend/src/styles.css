@@ -1,0 +1,27 @@
+body { margin: 0; font-family: "Chakra Petch", sans-serif; background: radial-gradient(circle at 10% 10%, #f59e0b33, transparent 30%), #0f172a; color: #fff; }
+.page { padding: 16px; }
+.grid { display: grid; grid-template-columns: 320px 1fr; gap: 12px; }
+aside { background: #1e293b; padding: 12px; border-radius: 12px; }
+.address-form { margin-top: 6px; display: grid; gap: 8px; }
+.address-form input { background: #0b1220; border: 1px solid #334155; border-radius: 10px; color: #fff; padding: 9px 10px; outline: none; }
+.address-form input:focus { border-color: #22d3ee; box-shadow: 0 0 0 2px #22d3ee33; }
+.address-error { color: #fca5a5; font-size: 13px; margin: 6px 0 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+button { border: 1px solid #475569; background: #0b1220; color: #fff; padding: 6px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; }
+button.on { border-color: #f59e0b; }
+.mapwrap { min-height: 75vh; position: relative; }
+.map { width: 100%; min-height: 75vh; border-radius: 12px; overflow: hidden; }
+.legend-dot { width: 10px; height: 10px; border-radius: 999px; border: 1px solid #0f172a; }
+.legend-list { margin-top: 12px; display: grid; gap: 6px; }
+.legend-item { display: grid; grid-template-columns: 12px 1fr auto; gap: 8px; align-items: center; font-size: 13px; color: #cbd5e1; }
+.legend-item strong { color: #fff; }
+.map-message { position: absolute; z-index: 500; top: 10px; left: 50%; transform: translateX(-50%); background: #0f172acc; border: 1px solid #334155; color: #fff; padding: 6px 10px; border-radius: 999px; font-size: 12px; }
+.crime-marker-icon span { display: block; width: 14px; height: 14px; border-radius: 999px; border: 2px solid #0f172a; box-shadow: 0 0 0 3px #ffffff33; }
+.pulse-shootout { animation: pulse-ring 1.5s ease-out infinite; transform-origin: center; }
+
+@keyframes pulse-ring {
+	0% { stroke-opacity: 0.95; fill-opacity: 0.22; transform: scale(0.9); }
+	70% { stroke-opacity: 0.12; fill-opacity: 0.04; transform: scale(1.9); }
+	100% { stroke-opacity: 0; fill-opacity: 0; transform: scale(2.1); }
+}
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } .map, .mapwrap { min-height: 55vh; } }
