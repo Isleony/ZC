@@ -70,3 +70,17 @@ docker compose up --build
 - Frontend: `http://localhost:5173`
 - API: `http://localhost:8000`
 - Swagger: `http://localhost:8000/docs`
+
+## Deploy no Vercel (frontend + API)
+
+Este repositorio agora pode subir frontend e API no mesmo projeto Vercel.
+
+1. Importe o repositorio no Vercel.
+2. Deploy (o `vercel.json` ja builda o frontend e expõe a API em `/api`).
+3. Acesse:
+
+- Frontend: `/`
+- API health: `/api/health`
+- API docs: `/api/docs`
+
+Observacao: em producao, o frontend usa `/api` automaticamente. Em ambiente local, continua usando `http://<seu-ip>:8000`.

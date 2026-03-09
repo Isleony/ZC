@@ -3,7 +3,33 @@ import L from "leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { CircleMarker, MapContainer, Marker, TileLayer, Tooltip, useMap } from "react-leaflet";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+function isPrivateOrLocalHost(hostname) {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".local") ||
+    /^10\./.test(hostname) ||
+    /^192\.168\./.test(hostname) ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(hostname)
+  );
+}
+
+function getDefaultApiBase() {
+  if (typeof window === "undefined") return "http://localhost:8000";
+  const { hostname, protocol } = window.location;
+  if (isPrivateOrLocalHost(hostname)) {
+    return `${protocol}//${hostname}:8000`;
+  }
+  return "/api";
+}
+
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.VITE_API_HOST
+    ? `${import.meta.env.VITE_API_PROTOCOL || "https"}://${import.meta.env.VITE_API_HOST}:${
+        import.meta.env.VITE_API_PORT || "8000"
+      }`
+    : getDefaultApiBase());
 
 const TYPES = ["tiroteio", "roubo", "homicidio", "furto", "violencia_domestica"];
 const TYPE_LABELS = {
