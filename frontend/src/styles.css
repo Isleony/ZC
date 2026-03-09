@@ -6,6 +6,8 @@ aside { background: #1e293b; padding: 12px; border-radius: 12px; }
 .address-form input { background: #0b1220; border: 1px solid #334155; border-radius: 10px; color: #fff; padding: 9px 10px; outline: none; }
 .address-form input:focus { border-color: #22d3ee; box-shadow: 0 0 0 2px #22d3ee33; }
 .address-error { color: #fca5a5; font-size: 13px; margin: 6px 0 10px; }
+.address-hint { color: #bae6fd; font-size: 12px; margin: 6px 0 10px; }
+.clear-search { width: 100%; justify-content: center; border-color: #22d3ee; color: #bae6fd; margin-bottom: 10px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 button { border: 1px solid #475569; background: #0b1220; color: #fff; padding: 6px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; }
 button.on { border-color: #f59e0b; }

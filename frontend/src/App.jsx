@@ -32,6 +32,7 @@ const API_BASE =
     : getDefaultApiBase());
 
 const TYPES = ["tiroteio", "roubo", "homicidio", "furto", "violencia_domestica"];
+const SEARCH_RADIUS_KM = 8;
 const TYPE_LABELS = {
   tiroteio: "Tiroteio",
   roubo: "Roubo",
@@ -87,19 +88,49 @@ export default function App() {
   const [mapZoom, setMapZoom] = useState(11);
 
   useEffect(() => {
-    const typeQuery = types.map((t) => `types=${t}`).join("&");
-    setError("");
+    async function loadIncidents() {
+      setError("");
 
-    fetch(`${API_BASE}/incidents?hours=${hours}&${typeQuery}`)
-      .then((r) => r.json())
-      .then(setIncidents)
-      .catch(() => setError("Nao foi possivel carregar as ocorrencias da API."));
+      try {
+        if (searchedLocation) {
+          const query = new URLSearchParams({
+            lat: String(searchedLocation.lat),
+            lng: String(searchedLocation.lng),
+            radius_km: String(SEARCH_RADIUS_KM),
+            hours: String(hours),
+          });
+
+          const response = await fetch(`${API_BASE}/alerts/check?${query.toString()}`);
+          if (!response.ok) throw new Error("Falha na busca por local");
+
+          const data = await response.json();
+          const filtered = data.filter((item) => types.includes(item.incident_type));
+          setIncidents(filtered);
+
+          if (filtered.length === 0) {
+            setError(`Nenhuma ocorrencia encontrada em ${SEARCH_RADIUS_KM} km deste endereco.`);
+          }
+          return;
+        }
+
+        const typeQuery = types.map((t) => `types=${t}`).join("&");
+        const response = await fetch(`${API_BASE}/incidents?hours=${hours}&${typeQuery}`);
+        if (!response.ok) throw new Error("Falha na busca geral");
+        const data = await response.json();
+        setIncidents(data);
+      } catch {
+        setIncidents([]);
+        setError("Nao foi possivel carregar as ocorrencias da API.");
+      }
+    }
+
+    loadIncidents();
 
     fetch(`${API_BASE}/risk-zones?hours=${hours}&limit=10`)
       .then((r) => r.json())
       .then(setRisk)
       .catch(() => setRisk([]));
-  }, [hours, types]);
+  }, [hours, types, searchedLocation]);
 
   const countsByType = useMemo(() => {
     const counts = {};
@@ -112,6 +143,13 @@ export default function App() {
 
   function toggleType(t) {
     setTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
+  }
+
+  function clearAddressSearch() {
+    setSearchedLocation(null);
+    setAddressError("");
+    setMapCenter(initialCenter);
+    setMapZoom(11);
   }
 
   async function handleAddressSearch(event) {
@@ -154,7 +192,7 @@ export default function App() {
         label: first.display_name,
       });
       setMapCenter([lat, lng]);
-      setMapZoom(14);
+      setMapZoom(15);
     } catch {
       setAddressError("Nao foi possivel buscar esse endereco agora.");
     } finally {
@@ -175,10 +213,20 @@ export default function App() {
               placeholder="Ex: Av Paulista 1000, Sao Paulo"
             />
             <button type="submit" disabled={addressLoading}>
-              {addressLoading ? "Buscando..." : "Ver local"}
+              {addressLoading ? "Buscando..." : "Pesquisar"}
             </button>
           </form>
           {addressError ? <p className="address-error">{addressError}</p> : null}
+          {searchedLocation ? (
+            <>
+              <p className="address-hint">
+                Buscando ocorrencias em ate {SEARCH_RADIUS_KM} km de: {searchedLocation.label}
+              </p>
+              <button type="button" className="clear-search" onClick={clearAddressSearch}>
+                Voltar para visao geral
+              </button>
+            </>
+          ) : null}
 
           <label>Periodo</label>
           <select value={hours} onChange={(e) => setHours(Number(e.target.value))}>
