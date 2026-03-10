@@ -33,6 +33,16 @@ const API_BASE =
 
 const TYPES = ["tiroteio", "roubo", "homicidio", "furto", "violencia_domestica"];
 const SEARCH_RADIUS_KM = 8;
+const PERIOD_OPTIONS = [
+  { key: "today", label: "Hoje" },
+  { key: "6", label: "6h" },
+  { key: "12", label: "12h" },
+  { key: "24", label: "24h" },
+  { key: "72", label: "72h" },
+  { key: "168", label: "7 dias" },
+  { key: "360", label: "15 dias" },
+  { key: "720", label: "30 dias" },
+];
 const TYPE_LABELS = {
   tiroteio: "Tiroteio",
   roubo: "Roubo",
@@ -73,9 +83,29 @@ function MapFlyTo({ center, zoom }) {
   return null;
 }
 
+function getHoursFromPeriod(periodKey) {
+  if (periodKey === "today") {
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    const diffMs = now.getTime() - start.getTime();
+    return Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60)));
+  }
+  return Number(periodKey);
+}
+
+function formatIncidentTime(isoDate) {
+  return new Date(isoDate).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function App() {
   const initialCenter = [-22.9068, -43.1729];
-  const [hours, setHours] = useState(168);
+  const [periodKey, setPeriodKey] = useState("168");
   const [types, setTypes] = useState(TYPES);
   const [incidents, setIncidents] = useState([]);
   const [risk, setRisk] = useState([]);
@@ -86,6 +116,7 @@ export default function App() {
   const [searchedLocation, setSearchedLocation] = useState(null);
   const [mapCenter, setMapCenter] = useState(initialCenter);
   const [mapZoom, setMapZoom] = useState(11);
+  const hours = useMemo(() => getHoursFromPeriod(periodKey), [periodKey]);
 
   useEffect(() => {
     async function loadIncidents() {
@@ -234,11 +265,10 @@ export default function App() {
           ) : null}
 
           <label>Periodo</label>
-          <select value={hours} onChange={(e) => setHours(Number(e.target.value))}>
-            <option value={24}>24h</option>
-            <option value={72}>72h</option>
-            <option value={168}>7 dias</option>
-            <option value={720}>30 dias</option>
+          <select value={periodKey} onChange={(e) => setPeriodKey(e.target.value)}>
+            {PERIOD_OPTIONS.map((option) => (
+              <option key={option.key} value={option.key}>{option.label}</option>
+            ))}
           </select>
           <div className="chips">
             {TYPES.map((t) => (
@@ -258,7 +288,7 @@ export default function App() {
             ))}
           </div>
           <h3>Zonas de risco</h3>
-          {risk.map((r, i) => <p key={r.region}>{i + 1}. {r.region} ({r.weighted_risk})</p>)}
+          {risk.map((r, i) => <p key={r.region}>{i + 1}. {r.region} ({r.weighted_risk}) - {formatIncidentTime(r.latest_incident)}</p>)}
           {searchedLocation ? (
             <>
               <h3>Ocorrencias proximas</h3>
@@ -267,7 +297,7 @@ export default function App() {
               ) : (
                 nearbyIncidents.map((item) => (
                   <p key={`near-${item.id}`}>
-                    {TYPE_LABELS[item.incident_type] || item.incident_type} - {item.region}
+                    {TYPE_LABELS[item.incident_type] || item.incident_type} - {item.region} - {formatIncidentTime(item.occurred_at)}
                   </p>
                 ))
               )}
@@ -364,7 +394,7 @@ export default function App() {
                 return (
                   <Marker key={x.id} position={[x.lat, x.lng]} icon={makeDotIcon(color)}>
                     <Tooltip>
-                      {TYPE_LABELS[x.incident_type] || x.incident_type}: {x.title} - {x.region}
+                      {TYPE_LABELS[x.incident_type] || x.incident_type}: {x.title} - {x.region} - {formatIncidentTime(x.occurred_at)}
                     </Tooltip>
                   </Marker>
                 );
