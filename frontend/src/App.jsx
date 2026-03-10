@@ -141,6 +141,11 @@ export default function App() {
     return counts;
   }, [incidents]);
 
+  const nearbyIncidents = useMemo(() => {
+    if (!searchedLocation) return [];
+    return incidents.slice(0, 12);
+  }, [incidents, searchedLocation]);
+
   function toggleType(t) {
     setTypes((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
   }
@@ -254,6 +259,20 @@ export default function App() {
           </div>
           <h3>Zonas de risco</h3>
           {risk.map((r, i) => <p key={r.region}>{i + 1}. {r.region} ({r.weighted_risk})</p>)}
+          {searchedLocation ? (
+            <>
+              <h3>Ocorrencias proximas</h3>
+              {nearbyIncidents.length === 0 ? (
+                <p>Nenhuma ocorrencia proxima no periodo selecionado.</p>
+              ) : (
+                nearbyIncidents.map((item) => (
+                  <p key={`near-${item.id}`}>
+                    {TYPE_LABELS[item.incident_type] || item.incident_type} - {item.region}
+                  </p>
+                ))
+              )}
+            </>
+          ) : null}
         </aside>
         <section className="mapwrap">
           {error ? <div className="map-message">{error}</div> : null}
